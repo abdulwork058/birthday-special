@@ -188,8 +188,13 @@
             const currentUrl = window.location.origin.replace('qr-heart.html', '');
             document.getElementById('urlDisplay').textContent = currentUrl;
 
+            // Create temporary container for QR code generation
+            const tempContainer = document.createElement('div');
+            tempContainer.style.display = 'none';
+            document.body.appendChild(tempContainer);
+
             // Generate QR code with higher error correction for better visibility through heart shape
-            const qr = new QRCode({
+            const qr = new QRCode(tempContainer, {
                 text: currentUrl,
                 width: 350,
                 height: 350,
@@ -199,15 +204,14 @@
                 useSVG: false
             });
 
-            // Get the canvas from QR code
-            const tempContainer = document.createElement('div');
-            qr.makeCode(currentUrl);
-            const qrCanvas = qr._canvas;
-
-            if (qrCanvas) {
-                // Draw heart-shaped QR code
-                drawHeartQR(qrCanvas, currentUrl);
-            }
+            // Wait a moment for QR code to render, then extract canvas
+            setTimeout(() => {
+                const qrCanvas = tempContainer.querySelector('canvas');
+                if (qrCanvas) {
+                    drawHeartQR(qrCanvas, currentUrl);
+                }
+                document.body.removeChild(tempContainer);
+            }, 100);
         }
 
         function drawHeartQR(sourceCanvas, text) {
