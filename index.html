@@ -127,7 +127,7 @@
     padding: 2rem 1rem;
     overflow: hidden;
     background: url('assets/3.png') center/cover no-repeat;
-    background-attachment: fixed;
+    background-attachment: scroll;
   }
 
   .hero::before {
@@ -1290,6 +1290,12 @@
     }
     /* Limit drifting clouds for performance */
     .clouds-layer .cloud:nth-child(n+6) { display: none; }
+    /* Fix background on mobile — fixed attachment doesn't work well */
+    .hero {
+      background-attachment: scroll !important;
+      background-size: cover;
+      background-position: center;
+    }
   }
 
   /* ============================
@@ -3883,17 +3889,24 @@ const App = {
 window.addEventListener('DOMContentLoaded', () => App.init());
 
 // Resume AudioContext on first user interaction to fix Tone.js warnings
-document.addEventListener('click', async () => {
+// Also initialize audio system on mobile
+const resumeAudioContext = async () => {
   if (Tone && Tone.context) {
     await Tone.context.resume();
+    await Tone.start();
+    // Initialize audio system if not already done
+    if (window.Audio && !Audio.initialized) {
+      try {
+        await Audio.init();
+      } catch (e) {
+        console.log('Audio init error:', e);
+      }
+    }
   }
-}, { once: true });
+};
 
-document.addEventListener('touchstart', async () => {
-  if (Tone && Tone.context) {
-    await Tone.context.resume();
-  }
-}, { once: true });
+document.addEventListener('click', resumeAudioContext, { once: true });
+document.addEventListener('touchstart', resumeAudioContext, { once: true });
 </script>
 </body>
 </html>

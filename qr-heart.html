@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mehr - Heart QR Code</title>
+    <title>Mehr - Heart QR Code Card</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Sacramento&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -27,7 +28,7 @@
             backdrop-filter: blur(10px);
             border-radius: 30px;
             padding: 3rem 2rem;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(196, 69, 105, 0.3);
             text-align: center;
@@ -48,18 +49,63 @@
             margin-bottom: 2rem;
         }
 
+        .card-preview {
+            margin: 2rem 0;
+            background: linear-gradient(135deg, #FFF5F0 0%, #FFECF0 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 3px dashed #FFB6C1;
+            position: relative;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-title {
+            font-family: 'Sacramento', cursive;
+            font-size: 2.2rem;
+            color: #C44569;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            color: #8B5FBF;
+            margin-bottom: 1.5rem;
+        }
+
         .qr-display {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 2rem 0;
-            min-height: 350px;
+            margin: 1.5rem 0;
+            min-height: 280px;
             position: relative;
         }
 
         canvas {
             max-width: 100%;
-            filter: drop-shadow(0 10px 30px rgba(196, 69, 105, 0.2));
+            filter: drop-shadow(0 5px 15px rgba(196, 69, 105, 0.15));
+        }
+
+        .card-message {
+            font-size: 0.95rem;
+            color: #4A2E3C;
+            margin-top: 1.5rem;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .card-hint {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(255, 176, 193, 0.2);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #8B1F3D;
         }
 
         .url-display {
@@ -69,36 +115,20 @@
             border-radius: 15px;
             border-left: 4px solid #FFB088;
             word-break: break-all;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #4A2E3C;
-        }
-
-        .instructions {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: #FFCEDA;
-            border-radius: 15px;
-            color: #8B1F3D;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .instructions strong {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #C44569;
         }
 
         .button-group {
             display: flex;
             gap: 1rem;
-            margin-top: 1.5rem;
+            margin-top: 2rem;
             flex-wrap: wrap;
             justify-content: center;
         }
 
-        .download-btn, .regenerate-btn {
-            padding: 1rem 1.5rem;
+        .download-card-btn, .regenerate-btn {
+            padding: 1rem 2rem;
             background: linear-gradient(135deg, #FFB088 0%, #E8627A 100%);
             color: white;
             border: none;
@@ -109,14 +139,14 @@
             transition: transform 0.3s, box-shadow 0.3s;
             box-shadow: 0 8px 20px rgba(196, 69, 105, 0.3);
             flex: 1;
-            min-width: 150px;
+            min-width: 180px;
         }
 
         .regenerate-btn {
             background: linear-gradient(135deg, #8B5FBF 0%, #C44569 100%);
         }
 
-        .download-btn:hover, .regenerate-btn:hover {
+        .download-card-btn:hover, .regenerate-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 30px rgba(196, 69, 105, 0.4);
         }
@@ -133,6 +163,12 @@
             font-weight: 600;
         }
 
+        .decoration {
+            display: inline-block;
+            margin: 0 0.5rem;
+            opacity: 0.6;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 2rem 1.5rem;
@@ -142,13 +178,26 @@
                 font-size: 2rem;
             }
 
+            .card-preview {
+                padding: 1.5rem;
+            }
+
             .button-group {
                 flex-direction: column;
             }
 
-            .download-btn, .regenerate-btn {
+            .download-card-btn, .regenerate-btn {
                 min-width: auto;
             }
+
+            .qr-display {
+                min-height: 240px;
+            }
+        }
+
+        /* Hidden canvas for card generation */
+        #cardCanvas {
+            display: none;
         }
     </style>
 </head>
@@ -158,30 +207,42 @@
         <h1>For Mehr</h1>
         <p class="subtitle">~ scan your heart ~</p>
 
-        <div class="qr-display">
-            <div class="loading" id="loading">Generating heart QR code...</div>
-            <canvas id="heartCanvas" width="350" height="350"></canvas>
+        <div class="card-preview">
+            <div class="loading" id="loading">Generating card...</div>
+            <div class="card-content">
+                <div class="card-title">💝 A Birthday Surprise 💝</div>
+                <div class="card-subtitle">Just for you...</div>
+
+                <div class="qr-display">
+                    <canvas id="heartCanvas" width="280" height="280"></canvas>
+                </div>
+
+                <div class="card-message">
+                    Scan the heart above to unlock your birthday surprise! 🎉
+                </div>
+
+                <div class="card-hint">
+                    📱 Open with your phone camera and tap the notification
+                </div>
+            </div>
         </div>
 
         <div class="url-display" id="urlDisplay">
             Loading your Vercel URL...
         </div>
 
-        <div class="instructions">
-            <strong>💫 How to use:</strong>
-            1. Scan this heart-shaped QR code<br>
-            2. It will open the birthday website<br>
-            3. Print it or share it with Mehr! 💕
-        </div>
-
         <div class="button-group">
-            <button class="download-btn" onclick="downloadQR()">📥 Download Heart QR</button>
-            <button class="regenerate-btn" onclick="regenerateQR()">🔄 Regenerate</button>
+            <button class="download-card-btn" onclick="downloadCard()">📥 Download Card</button>
+            <button class="regenerate-btn" onclick="regenerateCard()">🔄 Regenerate</button>
         </div>
     </div>
 
+    <!-- Hidden canvas for high-res card generation -->
+    <canvas id="cardCanvas" width="800" height="1000"></canvas>
+
     <script>
         let qrCodeData = null;
+        let cardImageData = null;
 
         function generateHeartQR() {
             document.getElementById('loading').style.display = 'block';
@@ -193,22 +254,23 @@
             tempContainer.style.display = 'none';
             document.body.appendChild(tempContainer);
 
-            // Generate QR code with higher error correction for better visibility through heart shape
+            // Generate QR code with higher error correction
             const qr = new QRCode(tempContainer, {
                 text: currentUrl,
-                width: 350,
-                height: 350,
+                width: 280,
+                height: 280,
                 colorDark: '#C44569',
                 colorLight: '#FFFFFF',
                 correctLevel: QRCode.CorrectLevel.H,
                 useSVG: false
             });
 
-            // Wait a moment for QR code to render, then extract canvas
+            // Wait for QR code to render
             setTimeout(() => {
                 const qrCanvas = tempContainer.querySelector('canvas');
                 if (qrCanvas) {
                     drawHeartQR(qrCanvas, currentUrl);
+                    generateCardImage(qrCanvas);
                 }
                 document.body.removeChild(tempContainer);
             }, 100);
@@ -217,38 +279,33 @@
         function drawHeartQR(sourceCanvas, text) {
             const canvas = document.getElementById('heartCanvas');
             const ctx = canvas.getContext('2d');
-            const size = 350;
+            const size = 280;
 
-            // Clear canvas
-            ctx.clearRect(0, 0, size, size);
+            // Clear canvas with white background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
 
-            // Save context
+            // Create heart path for clipping
+            const heartPath = new Path2D();
+            drawHeartPath2D(heartPath, size / 2, size / 2, size * 0.4);
+
+            // Draw QR code clipped to heart shape
             ctx.save();
-
-            // Create heart clipping path
-            ctx.beginPath();
-            drawHeartPath(ctx, size / 2, size / 2, size * 0.35);
-            ctx.clip();
-
-            // Draw QR code inside heart
+            ctx.clip(heartPath);
             ctx.drawImage(sourceCanvas, 0, 0, size, size);
-
-            // Restore context
             ctx.restore();
 
             // Draw heart border
             ctx.strokeStyle = '#C44569';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            drawHeartPath(ctx, size / 2, size / 2, size * 0.35);
-            ctx.stroke();
+            ctx.lineWidth = 4;
+            ctx.stroke(heartPath);
 
-            // Draw white circle for text background
+            // Draw white circle for "Mehr" text
             const centerX = size / 2;
-            const centerY = size / 2 + size * 0.05;
-            const circleRadius = size * 0.12;
+            const centerY = size / 2 + size * 0.08;
+            const circleRadius = size * 0.13;
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
             ctx.beginPath();
             ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
             ctx.fill();
@@ -257,7 +314,7 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Draw "Mehr" text in center
+            // Draw "Mehr" text
             ctx.fillStyle = '#C44569';
             ctx.font = 'bold 28px "Sacramento", cursive';
             ctx.textAlign = 'center';
@@ -268,51 +325,121 @@
             qrCodeData = canvas.toDataURL('image/png');
         }
 
-        function drawHeartPath(ctx, x, y, size) {
-            ctx.moveTo(x, y + size * 0.5);
-            ctx.bezierCurveTo(
-                x - size * 0.75, y - size * 0.25,
-                x - size * 0.75, y - size * 0.65,
-                x - size * 0.25, y - size * 0.65
-            );
-            ctx.bezierCurveTo(
-                x + size * 0.1, y - size * 0.65,
-                x + size * 0.35, y - size * 0.35,
-                x, y - size * 0.1
-            );
-            ctx.bezierCurveTo(
-                x - size * 0.35, y - size * 0.35,
-                x - size * 0.1, y - size * 0.65,
-                x + size * 0.25, y - size * 0.65
-            );
-            ctx.bezierCurveTo(
-                x + size * 0.75, y - size * 0.65,
-                x + size * 0.75, y - size * 0.25,
-                x, y + size * 0.5
-            );
-            ctx.closePath();
+        function generateCardImage(qrCanvas) {
+            const cardCanvas = document.getElementById('cardCanvas');
+            const ctx = cardCanvas.getContext('2d');
+            const width = 800;
+            const height = 1000;
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#FFF5F0');
+            gradient.addColorStop(1, '#FFECF0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Decorative border
+            ctx.strokeStyle = '#FFB6C1';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(20, 20, width - 40, height - 40);
+
+            // Inner decorative border
+            ctx.strokeStyle = '#FFB088';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(35, 35, width - 70, height - 70);
+
+            // Title
+            ctx.fillStyle = '#C44569';
+            ctx.font = 'bold 48px "Sacramento", cursive';
+            ctx.textAlign = 'center';
+            ctx.fillText('💝 A Birthday Surprise 💝', width / 2, 100);
+
+            // Subtitle
+            ctx.fillStyle = '#8B5FBF';
+            ctx.font = '32px "Caveat", cursive';
+            ctx.fillText('Just for you...', width / 2, 150);
+
+            // Draw QR code in center
+            const qrSize = 280;
+            const qrX = (width - qrSize) / 2;
+            const qrY = (height - qrSize) / 2 - 50;
+            ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+
+            // Message below QR
+            ctx.fillStyle = '#4A2E3C';
+            ctx.font = '24px "Caveat", cursive';
+            ctx.textAlign = 'center';
+            ctx.fillText('Scan the heart to unlock your surprise! 🎉', width / 2, height - 150);
+
+            // Instructions
+            ctx.fillStyle = '#8B1F3D';
+            ctx.font = '18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('📱 Open with your phone camera', width / 2, height - 100);
+
+            // Save card image
+            cardImageData = cardCanvas.toDataURL('image/png');
         }
 
-        function downloadQR() {
-            if (!qrCodeData) {
-                alert('QR Code not generated yet. Please wait a moment.');
+        function drawHeartPath2D(path, cx, cy, size) {
+            const x = cx;
+            const y = cy;
+
+            path.moveTo(x, y + size);
+
+            path.bezierCurveTo(
+                x - size * 1.2, y + size * 0.5,
+                x - size * 1.2, y - size * 0.2,
+                x - size * 0.5, y - size * 0.5
+            );
+
+            path.bezierCurveTo(
+                x - size * 0.9, y - size * 0.8,
+                x - size * 0.4, y - size * 0.8,
+                x - size * 0.1, y - size * 0.4
+            );
+
+            path.bezierCurveTo(
+                x, y - size * 0.6,
+                x, y - size * 0.6,
+                x + size * 0.1, y - size * 0.4
+            );
+
+            path.bezierCurveTo(
+                x + size * 0.4, y - size * 0.8,
+                x + size * 0.9, y - size * 0.8,
+                x + size * 0.5, y - size * 0.5
+            );
+
+            path.bezierCurveTo(
+                x + size * 1.2, y - size * 0.2,
+                x + size * 1.2, y + size * 0.5,
+                x, y + size
+            );
+
+            path.closePath();
+        }
+
+        function downloadCard() {
+            if (!cardImageData) {
+                alert('Card not generated yet. Please wait a moment.');
                 return;
             }
 
             const link = document.createElement('a');
-            link.href = qrCodeData;
-            link.download = 'Mehr-Heart-QR-Code.png';
+            link.href = cardImageData;
+            link.download = 'Mehr-Birthday-Card.png';
             link.click();
         }
 
-        function regenerateQR() {
+        function regenerateCard() {
             document.getElementById('loading').style.display = 'block';
             setTimeout(() => {
                 generateHeartQR();
             }, 300);
         }
 
-        // Generate QR code when page loads
+        // Generate on page load
         window.addEventListener('load', generateHeartQR);
     </script>
 </body>
