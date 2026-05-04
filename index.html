@@ -1734,7 +1734,7 @@
 </button>
 
 <!-- BIRTHDAY SONG -->
-<audio id="birthdayAudio" loop>
+<audio id="birthdayAudio" autoplay muted loop>
   <source src="assets/sounds/nastelbom-happy-birthday.mp3" type="audio/mpeg">
 </audio>
 
@@ -3769,20 +3769,34 @@ const App = {
 
 window.addEventListener('DOMContentLoaded', () => App.init());
 
-// Initialize audio on first user interaction
+// Initialize audio and try to unmute on user interaction
 const initializeAudio = async () => {
   if (window.Audio && !Audio.initialized) {
     try {
       await Audio.init();
-      // Auto-play the birthday song
-      if (Audio.audioElement && !Audio.muted) {
-        Audio.audioElement.play().catch(e => console.log('Audio autoplay:', e));
+      // Try to unmute and play the birthday song
+      if (Audio.audioElement) {
+        Audio.audioElement.muted = false;
+        Audio.audioElement.play().catch(e => console.log('Audio unmute:', e));
+        Audio.unmute();
       }
     } catch (e) {
       console.log('Audio init error:', e);
     }
   }
 };
+
+// Try to unmute audio after page loads
+window.addEventListener('load', async () => {
+  const audio = document.getElementById('birthdayAudio');
+  if (audio) {
+    // Wait a moment then try to unmute
+    setTimeout(() => {
+      audio.muted = false;
+      audio.play().catch(e => console.log('Audio autoplay:', e));
+    }, 500);
+  }
+});
 
 document.addEventListener('click', initializeAudio, { once: true });
 document.addEventListener('touchstart', initializeAudio, { once: true });
